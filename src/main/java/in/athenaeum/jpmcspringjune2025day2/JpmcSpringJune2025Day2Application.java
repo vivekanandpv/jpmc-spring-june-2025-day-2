@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class JpmcSpringJune2025Day2Application {
 
-	public static void main(String[] args) {
-		SpringApplication.run(JpmcSpringJune2025Day2Application.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(JpmcSpringJune2025Day2Application.class, args);
+    }
 
 }
