@@ -39,12 +39,18 @@ public class CustomerServiceJdbcImplementation implements CustomerService {
 
     @Override
     public CustomerViewModel update(int customerId, CustomerUpdateViewModel viewModel) {
-        return null;
+        Customer customerDb = customerJdbcRepository.getById(customerId);
+        
+        customerDb.setFirstName(viewModel.getFirstName());
+        customerDb.setLastName(viewModel.getLastName());
+        customerDb.setCity(viewModel.getCity());
+        
+        return toViewModel(customerJdbcRepository.updateCustomer(customerDb));
     }
 
     @Override
     public void deleteById(int customerId) {
-
+        customerJdbcRepository.deleteById(customerId);
     }
     
     private CustomerViewModel toViewModel(Customer customer) {
