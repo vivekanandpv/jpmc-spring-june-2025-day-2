@@ -5,6 +5,7 @@ import in.athenaeum.jpmcspringjune2025day2.services.CustomerService;
 import in.athenaeum.jpmcspringjune2025day2.viewmodels.CustomerCreateViewModel;
 import in.athenaeum.jpmcspringjune2025day2.viewmodels.CustomerUpdateViewModel;
 import in.athenaeum.jpmcspringjune2025day2.viewmodels.CustomerViewModel;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("api/v1/customers")
+@Tag(name = "Customer API", description = "RESTful webservice API for Customers")
 public class CustomerApi {
     private final CustomerService customerService;
 
