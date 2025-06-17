@@ -1,5 +1,6 @@
 package in.athenaeum.jpmcspringjune2025day2.apis;
 
+import in.athenaeum.jpmcspringjune2025day2.services.CustomerService;
 import in.athenaeum.jpmcspringjune2025day2.viewmodels.CustomerCreateViewModel;
 import in.athenaeum.jpmcspringjune2025day2.viewmodels.CustomerUpdateViewModel;
 import in.athenaeum.jpmcspringjune2025day2.viewmodels.CustomerViewModel;
@@ -11,28 +12,35 @@ import java.util.List;
 @RestController
 @RequestMapping("api/v1/customers")
 public class CustomerApi {
+    private final CustomerService customerService;
+
+    public CustomerApi(CustomerService customerService) {
+        this.customerService = customerService;
+    }
+
     @GetMapping
     public ResponseEntity<List<CustomerViewModel>> getAll() {
-        return ResponseEntity.ok(List.of(new CustomerViewModel()));
+        return ResponseEntity.ok(customerService.getAll());
     }
     
     @GetMapping("{customerId}")
     public ResponseEntity<CustomerViewModel> getById(@PathVariable int customerId) {
-        return ResponseEntity.ok(new CustomerViewModel());
+        return ResponseEntity.ok(customerService.getById(customerId));
     }
     
     @PostMapping
     public ResponseEntity<CustomerViewModel> create(@RequestBody CustomerCreateViewModel viewModel) {
-        return ResponseEntity.ok(new CustomerViewModel());
+        return ResponseEntity.ok(customerService.create(viewModel));
     }
     
     @PutMapping("{customerId}")
     public ResponseEntity<CustomerViewModel> update(@PathVariable int customerId, @RequestBody CustomerUpdateViewModel viewModel) {
-        return ResponseEntity.ok(new CustomerViewModel());
+        return ResponseEntity.ok(customerService.update(customerId, viewModel));
     }
     
     @DeleteMapping("{customerId}")
     public ResponseEntity<Void> deleteById(@PathVariable int customerId) {
+        customerService.deleteById(customerId);
         return ResponseEntity.noContent().build();
     }
 }
