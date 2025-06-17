@@ -17,6 +17,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("api/v1/customers")
 @Tag(name = "Customer API", description = "RESTful webservice API for Customers")
+//@CrossOrigin({"http://localhost:4200", "http://localhost:3000"})
 public class CustomerApi {
     private final CustomerService customerService;
 
