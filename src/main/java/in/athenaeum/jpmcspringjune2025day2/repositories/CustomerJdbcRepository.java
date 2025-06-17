@@ -63,7 +63,7 @@ public class CustomerJdbcRepository {
     }
 
     public Customer updateCustomer(Customer customer) {
-        String sql = "UPDATE public.customers SET first_name = ?, last_name = ?, city =? WHERE customer_id=?";
+        String sql = "UPDATE public.customer SET first_name = ?, last_name = ?, city =? WHERE customer_id=?";
         this.jdbcTemplate.update(sql, customer.getFirstName(), customer.getLastName(),
                 customer.getCity(), customer.getCustomerId());
         return customer;
