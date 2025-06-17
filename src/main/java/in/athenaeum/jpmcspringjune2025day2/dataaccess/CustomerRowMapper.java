@@ -2,10 +2,12 @@ package in.athenaeum.jpmcspringjune2025day2.dataaccess;
 
 import in.athenaeum.jpmcspringjune2025day2.models.Customer;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.stereotype.Component;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+@Component
 public class CustomerRowMapper implements RowMapper<Customer> {
     @Override
     public Customer mapRow(ResultSet rs, int rowNum) throws SQLException {
