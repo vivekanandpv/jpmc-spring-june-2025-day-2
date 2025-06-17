@@ -5,6 +5,7 @@ import in.athenaeum.jpmcspringjune2025day2.services.CustomerService;
 import in.athenaeum.jpmcspringjune2025day2.viewmodels.CustomerCreateViewModel;
 import in.athenaeum.jpmcspringjune2025day2.viewmodels.CustomerUpdateViewModel;
 import in.athenaeum.jpmcspringjune2025day2.viewmodels.CustomerViewModel;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,10 @@ public class CustomerApi {
         this.customerService = customerService;
     }
 
+    @Operation(
+            summary = "Get all customers",
+            description = "Returns all customers"
+    )
     @GetMapping
     public ResponseEntity<List<CustomerViewModel>> getAll() {
         return ResponseEntity.ok(customerService.getAll());
