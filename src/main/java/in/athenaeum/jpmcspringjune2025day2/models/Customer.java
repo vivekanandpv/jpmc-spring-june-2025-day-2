@@ -1,6 +1,14 @@
 package in.athenaeum.jpmcspringjune2025day2.models;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
 public class Customer {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int customerId;
     private String firstName;
     private String lastName;

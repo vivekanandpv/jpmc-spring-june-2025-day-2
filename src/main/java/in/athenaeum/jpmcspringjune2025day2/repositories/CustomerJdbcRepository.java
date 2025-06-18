@@ -13,7 +13,7 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;
 
-@Repository
+//@Repository
 public class CustomerJdbcRepository {
     private final RowMapper<Customer> customerRowMapper;
     private final JdbcTemplate jdbcTemplate;
