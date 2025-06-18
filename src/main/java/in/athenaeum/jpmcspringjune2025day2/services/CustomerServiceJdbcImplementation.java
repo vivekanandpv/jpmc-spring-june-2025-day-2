@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
+//@Service
 public class CustomerServiceJdbcImplementation implements CustomerService {
     private final CustomerJdbcRepository customerJdbcRepository;
 
