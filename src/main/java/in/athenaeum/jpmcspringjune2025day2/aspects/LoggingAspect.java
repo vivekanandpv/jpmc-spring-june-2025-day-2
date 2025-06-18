@@ -21,6 +21,17 @@ public class LoggingAspect {
     //  Advise
     @Around("@annotation(in.athenaeum.jpmcspringjune2025day2.aspects.AppLog)")
     public Object log(ProceedingJoinPoint joinPoint) throws Throwable {
+        Object[] args = joinPoint.getArgs();
+
+        logger.info("Logging Aspect: Start logging...");
+        for (Object arg : args) {
+            logger.info("Argument: " + arg);
+        }
         
+        Object value = joinPoint.proceed();
+        
+        logger.info("Logging Aspect: End logging...");
+        
+        return value;
     }
 }
