@@ -1,5 +1,6 @@
 package in.athenaeum.jpmcspringjune2025day2.services;
 
+import in.athenaeum.jpmcspringjune2025day2.aspects.AppLog;
 import in.athenaeum.jpmcspringjune2025day2.exceptions.RecordNotFoundException;
 import in.athenaeum.jpmcspringjune2025day2.models.Customer;
 import in.athenaeum.jpmcspringjune2025day2.repositories.CustomerJpaRepository;
@@ -18,7 +19,7 @@ public class CustomerServiceJpaImplementation implements CustomerService {
     public CustomerServiceJpaImplementation(CustomerJpaRepository customerJpaRepository) {
         this.customerJpaRepository = customerJpaRepository;
     }
-
+    
     @Override
     public List<CustomerViewModel> getAll() {
         return customerJpaRepository
@@ -28,6 +29,7 @@ public class CustomerServiceJpaImplementation implements CustomerService {
                 .toList();
     }
 
+    @AppLog
     @Override
     public CustomerViewModel getById(int customerId) {
         return toViewModel(fromId(customerId));
