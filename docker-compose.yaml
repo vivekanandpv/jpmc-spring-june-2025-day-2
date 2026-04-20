@@ -1,0 +1,9 @@
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.119.0
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel/config.yaml
+      - ./otel-output:/var/otel        # output files land here on host
+    command: ["--config=/etc/otel/config.yaml"]
+    ports:
+      - "4318:4318"
