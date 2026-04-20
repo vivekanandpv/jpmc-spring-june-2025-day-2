@@ -11,12 +11,16 @@ exporters:
     path: /var/otel/metrics.json
   file/logs:
     path: /var/otel/logs.json
+  otlp/jaeger:
+    endpoint: jaeger:4317
+    tls:
+      insecure: true
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [file/traces]
+      exporters: [file/traces, otlp/jaeger] #fanning out to both exporter
     metrics:
       receivers: [otlp]
       exporters: [file/metrics]
