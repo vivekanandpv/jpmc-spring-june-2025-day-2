@@ -7,6 +7,7 @@ services:
     command: ["--config=/etc/otel/config.yaml"]
     ports:
       - "4318:4318"
+      - "4317:4317"
     depends_on:
       - jaeger
   
@@ -14,4 +15,4 @@ services:
     image: jaegertracing/all-in-one:latest
     ports:
       - "16686:16686" # UI
-      - "4317:4317"  # OTLP receiver (receives from OTel collector)
+      - "4319:4317"  # OTLP receiver (receives from OTel collector); 4317 conflicts with OTel Collector, hence remapped to 4319 here
