@@ -7,6 +7,8 @@ import in.athenaeum.jpmcspringjune2025day2.viewmodels.CustomerUpdateViewModel;
 import in.athenaeum.jpmcspringjune2025day2.viewmodels.CustomerViewModel;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +22,7 @@ import java.util.Map;
 //@CrossOrigin({"http://localhost:4200", "http://localhost:3000"})
 public class CustomerApi {
     private final CustomerService customerService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(CustomerApi.class.getName());
 
     public CustomerApi(CustomerService customerService) {
         this.customerService = customerService;
@@ -31,11 +34,13 @@ public class CustomerApi {
     )
     @GetMapping
     public ResponseEntity<List<CustomerViewModel>> getAll() {
+        LOGGER.info("Getting all customers");       
         return ResponseEntity.ok(customerService.getAll());
     }
     
     @GetMapping("{customerId}")
     public ResponseEntity<CustomerViewModel> getById(@PathVariable int customerId) {
+        LOGGER.info("Getting customer by id: {}", customerId);      
         return ResponseEntity.ok(customerService.getById(customerId));
     }
     
