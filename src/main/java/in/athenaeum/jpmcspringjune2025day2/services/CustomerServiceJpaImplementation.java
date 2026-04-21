@@ -7,6 +7,10 @@ import in.athenaeum.jpmcspringjune2025day2.repositories.CustomerJpaRepository;
 import in.athenaeum.jpmcspringjune2025day2.viewmodels.CustomerCreateViewModel;
 import in.athenaeum.jpmcspringjune2025day2.viewmodels.CustomerUpdateViewModel;
 import in.athenaeum.jpmcspringjune2025day2.viewmodels.CustomerViewModel;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.api.trace.Tracer;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
@@ -15,11 +19,19 @@ import java.util.List;
 @Service
 public class CustomerServiceJpaImplementation implements CustomerService {
     private final CustomerJpaRepository customerJpaRepository;
+    private final Tracer tracer;
+    private final Counter counter;
 
-    public CustomerServiceJpaImplementation(CustomerJpaRepository customerJpaRepository) {
+    public CustomerServiceJpaImplementation(
+            CustomerJpaRepository customerJpaRepository,
+            Tracer tracer,
+            MeterRegistry meterRegistry
+    ) {
         this.customerJpaRepository = customerJpaRepository;
+        this.tracer = tracer;
+        this.counter = meterRegistry.counter("total.customers.created");
     }
-    
+
     @Override
     public List<CustomerViewModel> getAll() {
         return customerJpaRepository
@@ -37,13 +49,35 @@ public class CustomerServiceJpaImplementation implements CustomerService {
 
     @Override
     public CustomerViewModel create(CustomerCreateViewModel viewModel) {
-        return toViewModel(customerJpaRepository.saveAndFlush(toDomain(viewModel)));
+        Span span = tracer.spanBuilder("customers.created")
+                .setAttribute("customer.email", viewModel.getEmail())
+                .startSpan();
+
+        try {
+            span.addEvent("customer.validation.start");
+            Customer newCustomer = toDomain(viewModel);
+            span.addEvent("customer.validation.end");
+            
+            span.addEvent("customer.save.start");
+            Customer customerDb = customerJpaRepository.saveAndFlush(newCustomer);
+            counter.increment();
+            span.addEvent("customer.save.end");
+            
+            span.setAttribute("customer.id", customerDb.getCustomerId());
+            return toViewModel(customerDb);
+        } catch (RuntimeException ex) {
+            span.addEvent("customer.create.error");
+            span.recordException(ex);
+            throw ex;
+        } finally {
+            span.end();
+        }
     }
 
     @Override
     public CustomerViewModel update(int customerId, CustomerUpdateViewModel viewModel) {
         Customer customerDb = fromId(customerId);
-                
+
         customerDb.setFirstName(viewModel.getFirstName());
         customerDb.setLastName(viewModel.getLastName());
         customerDb.setCity(viewModel.getCity());
@@ -55,7 +89,7 @@ public class CustomerServiceJpaImplementation implements CustomerService {
     public void deleteById(int customerId) {
         customerJpaRepository.delete(fromId(customerId));
     }
-    
+
     private Customer fromId(int customerId) {
         return customerJpaRepository
                 .findById(customerId)
