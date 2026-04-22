@@ -31,6 +31,9 @@ management:
       export:
         url: http://localhost:4318/v1/metrics  # Micrometer's OTLP registry only supports HTTP, not gRPC
         step: 10s
+        
+    logging:
+      endpoint: http://localhost:4318/v1/logs
   endpoints:
     web:
       exposure:
@@ -47,3 +50,5 @@ management:
   tracing:
     sampling:
       probability: 1.0
+      
+  

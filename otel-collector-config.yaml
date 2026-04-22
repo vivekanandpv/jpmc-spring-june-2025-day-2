@@ -7,14 +7,17 @@ receivers:
         endpoint: 0.0.0.0:4317
 
 exporters:
-  file/traces:
-    path: /var/otel/traces.json
-  file/metrics:
-    path: /var/otel/metrics.json
-  file/logs:
-    path: /var/otel/logs.json
-  otlp/jaeger:
-    endpoint: jaeger:4317 # internal Docker network port, not the host mapping!
+  loki:
+    endpoint: "http://loki:3100/loki/api/v1/push"
+    default_labels_enabled:
+      exporter: false
+      job: true
+  otlp/loki:
+    endpoint: "http://loki:3100/otlp/v1/logs"
+    tls:
+      insecure: true
+  otlp/tempo:
+    endpoint: "http://tempo:4317"
     tls:
       insecure: true
   prometheus:
@@ -24,10 +27,10 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [file/traces, otlp/jaeger] #fanning out to both exporter
+      exporters: [otlp/tempo] #fanning out to both exporter
     metrics:
       receivers: [otlp]
       exporters: [prometheus]
     logs:
       receivers: [otlp]
-      exporters: [file/logs]
+      exporters: [otlp/loki]
