@@ -12,6 +12,7 @@ spring:
     driver-class-name: org.h2.Driver
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
+    open-in-view: false
 
 
 otel:
@@ -29,19 +30,12 @@ otel:
       filter: TRACE_BASED
 
 management:
-  otlp:
-    metrics:
-      export:
-        url: http://localhost:4318/v1/metrics  # Micrometer's OTLP registry only supports HTTP, not gRPC
-        step: 10s
-      
   endpoints:
     web:
       exposure:
         include: 
           - health
           - metrics
-          - prometheus
   metrics:
     distribution:
       percentiles-histogram:
@@ -53,6 +47,10 @@ management:
             time: true
           create:
             time: true
+    export:
+      otlp:
+        url: http://localhost:4318/v1/metrics
+        step: 10s
   tracing:
     sampling:
       probability: 1.0

@@ -83,17 +83,11 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-<!--        if you want the /actuator/prometheus endpoint-->
+        <!-- Micrometer for OTLP Metrics -->
         <dependency>
             <groupId>io.micrometer</groupId>
-            <artifactId>micrometer-registry-prometheus</artifactId>
+            <artifactId>micrometer-registry-otlp</artifactId>
         </dependency>
-
-<!--        Micrometer for OTLP Metrics-->
-<!--        <dependency>-->
-<!--            <groupId>io.micrometer</groupId>-->
-<!--            <artifactId>micrometer-registry-otlp</artifactId>-->
-<!--        </dependency>-->
 
 <!--        OTel Starter for traces and logs via OTLP-->
         <!-- Source: https://mvnrepository.com/artifact/io.opentelemetry.instrumentation/opentelemetry-spring-boot-starter -->
