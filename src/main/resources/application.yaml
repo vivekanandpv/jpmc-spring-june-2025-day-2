@@ -12,29 +12,30 @@ spring:
     driver-class-name: org.h2.Driver
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
-
+    open-in-view: false
 
 otel:
   exporter:
     otlp:
       endpoint: http://localhost:4317
       protocol: grpc
-  logs:
-    exporter: otlp
   traces:
     exporter: otlp
-    sampler: always_on  # 100% of traces are sampled during dev
+    sampler: always_on
+  logs:
+    exporter: otlp
+  resource:
+    attributes:
+      service.name: jpmc-spring-june-2025-day-2
 
 management:
-  otlp:
-    metrics:
-      export:
-        url: http://localhost:4318/v1/metrics  # Micrometer's OTLP registry only supports HTTP, not gRPC
-        step: 10s
+  tracing:
+    sampling:
+      probability: 1.0
   endpoints:
     web:
       exposure:
-        include: 
+        include:
           - health
           - metrics
           - prometheus
@@ -44,6 +45,13 @@ management:
         http:
           server:
             requests: true
-  tracing:
-    sampling:
-      probability: 1.0
+        customers:
+          getall:
+            time: true
+    export:
+      otlp:
+        url: http://localhost:4318/v1/metrics
+        step: 10s
+  
+      
+  
