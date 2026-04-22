@@ -35,14 +35,14 @@ processors:
     timeout: 5s
 
   tail_sampling:
-    decision_wait: 1s
-    num_traces: 5
-    expected_new_traces_per_sec: 1
+    decision_wait: 5s
+    num_traces: 5000
+    expected_new_traces_per_sec: 100
     policies:
       - name: normal-traces
         type: probabilistic
         probabilistic:
-          sampling_percentage: 10
+          sampling_percentage: 10.0
 
 service:
   pipelines:
