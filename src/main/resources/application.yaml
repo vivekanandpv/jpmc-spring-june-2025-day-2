@@ -17,7 +17,7 @@ spring:
 otel:
   exporter:
     otlp:
-      endpoint: http://localhost:4317
+      endpoint: http://${OTEL_COLLECTOR_HOST:localhost}:4317
       protocol: grpc
   logs:
     exporter: otlp
@@ -29,7 +29,7 @@ management:
   otlp:
     metrics:
       export:
-        url: http://localhost:4318/v1/metrics  # Micrometer's OTLP registry only supports HTTP, not gRPC
+        url: http://${OTEL_COLLECTOR_HOST:localhost}:4318/v1/metrics  # Micrometer's OTLP registry only supports HTTP, not gRPC
         step: 10s
   endpoints:
     web:
