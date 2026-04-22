@@ -47,8 +47,6 @@ management:
         http:
           server:
             requests: true
-  tracing:
-    sampling:
-      probability: 1.0
+  
       
   
