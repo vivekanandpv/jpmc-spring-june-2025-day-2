@@ -20,37 +20,42 @@ exporters:
     endpoint: "http://tempo:4317"
     tls:
       insecure: true
+
   prometheus:
     endpoint: "0.0.0.0:8889"
-    
+
+  otlphttp/loki:
+    endpoint: "http://loki:3100/otlp"
+    tls:
+      insecure: true
+
 processors:
   batch:
     send_batch_size: 1
     timeout: 5s
+
   tail_sampling:
     decision_wait: 1s
     num_traces: 5
     expected_new_traces_per_sec: 1
     policies:
-#      or based!
-#      - name: error-traces
-#        type: status_code
-#        status_code: { status_codes: ["ERROR"] }
-#      - name: slow-traces
-#        type: latency
-#        latency: {threshold_ms: 2000}
       - name: normal-traces
         type: probabilistic
-        probabilistic: {sampling_percentage: 10}
+        probabilistic:
+          sampling_percentage: 10
+
 service:
   pipelines:
     traces:
       receivers: [otlp]
       processors: [tail_sampling, batch]
-      exporters: [otlp/tempo] #fanning out to both exporter
+      exporters: [otlp/tempo]
+
     metrics:
       receivers: [otlp]
       exporters: [prometheus]
-#    logs:
-#      receivers: [otlp]
-#      exporters: [otlp/loki]
+
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/loki]
