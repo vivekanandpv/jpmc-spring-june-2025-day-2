@@ -11,8 +11,10 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.observation.annotation.Observed;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.context.Scope;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -46,9 +48,15 @@ public class CustomerServiceJpaImplementation implements CustomerService {
                 .tag("service", "customer")
                 .serviceLevelObjectives(1, 10, 20, 50, 100, 500)
                 .publishPercentiles(0.5, 0.75, 0.95, 0.99)
+                .publishPercentileHistogram()
                 .register(meterRegistry);       
     }
 
+    @Observed(
+            name = "customers.getall.time",
+            contextualName = "customer.getAll",
+            lowCardinalityKeyValues = {"region", "us-east"}
+    )
     @Override
     public List<CustomerViewModel> getAll() {
         return customerJpaRepository
@@ -64,6 +72,7 @@ public class CustomerServiceJpaImplementation implements CustomerService {
         return toViewModel(fromId(customerId));
     }
 
+    
     @Override
     public CustomerViewModel create(CustomerCreateViewModel viewModel) {
         double startTime = System.currentTimeMillis();
@@ -73,7 +82,7 @@ public class CustomerServiceJpaImplementation implements CustomerService {
                 .setAttribute("customer.email", viewModel.getEmail())
                 .startSpan();
 
-        try {
+        try (Scope scope = span.makeCurrent()) {
             span.addEvent("customer.validation.start");
             Customer newCustomer = toDomain(viewModel);
             span.addEvent("customer.validation.end");
