@@ -7,54 +7,25 @@ import in.athenaeum.jpmcspringjune2025day2.repositories.CustomerJpaRepository;
 import in.athenaeum.jpmcspringjune2025day2.viewmodels.CustomerCreateViewModel;
 import in.athenaeum.jpmcspringjune2025day2.viewmodels.CustomerUpdateViewModel;
 import in.athenaeum.jpmcspringjune2025day2.viewmodels.CustomerViewModel;
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.DistributionSummary;
-import io.micrometer.core.instrument.Gauge;
-import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.observation.annotation.Observed;
-import io.opentelemetry.api.trace.Span;
-import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.context.Scope;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.List;
 
 @Service
 public class CustomerServiceJpaImplementation implements CustomerService {
     private final CustomerJpaRepository customerJpaRepository;
-    private final Tracer tracer;
-    private final Counter counter;
-    private final Deque<Customer> pendingCustomers = new LinkedList<>();
-    private final MeterRegistry meterRegistry;
-    private final DistributionSummary customerAddLatency;
-
+    
     public CustomerServiceJpaImplementation(
-            CustomerJpaRepository customerJpaRepository,
-            Tracer tracer,
-            MeterRegistry meterRegistry
+            CustomerJpaRepository customerJpaRepository
     ) {
         this.customerJpaRepository = customerJpaRepository;
-        this.tracer = tracer;
-        this.counter = meterRegistry.counter("total.customers.created");
-        this.meterRegistry = meterRegistry;
-        
-        this.customerAddLatency = DistributionSummary
-                .builder("customer.add.latency")
-                .description("The latency of adding a customer")
-                .tag("service", "customer")
-                .serviceLevelObjectives(1, 10, 20, 50, 100, 500)
-                .publishPercentiles(0.5, 0.75, 0.95, 0.99)
-                .publishPercentileHistogram()
-                .register(meterRegistry);       
     }
 
     @Observed(
             name = "customers.getall.time",
-            contextualName = "customer.getAll",
+            contextualName = "customer.get-all",
             lowCardinalityKeyValues = {"region", "us-east"}
     )
     @Override
@@ -72,42 +43,12 @@ public class CustomerServiceJpaImplementation implements CustomerService {
         return toViewModel(fromId(customerId));
     }
 
-    
+    @Observed(name = "customers.create.time", contextualName = "customer.create")
     @Override
     public CustomerViewModel create(CustomerCreateViewModel viewModel) {
-        double startTime = System.currentTimeMillis();
-        
-        
-        Span span = tracer.spanBuilder("customers.created")
-                .setAttribute("customer.email", viewModel.getEmail())
-                .startSpan();
-
-        try (Scope scope = span.makeCurrent()) {
-            span.addEvent("customer.validation.start");
             Customer newCustomer = toDomain(viewModel);
-            span.addEvent("customer.validation.end");
-            
-            span.addEvent("customer.save.start");
             Customer customerDb = customerJpaRepository.saveAndFlush(newCustomer);
-            counter.increment();
-            span.addEvent("customer.save.end");
-            
-            span.setAttribute("customer.id", customerDb.getCustomerId());
-            
-            pendingCustomers.add(customerDb);
-            
-            double endTime = System.currentTimeMillis();
-            
-            customerAddLatency.record(endTime - startTime);
-            
             return toViewModel(customerDb);
-        } catch (RuntimeException ex) {
-            span.addEvent("customer.create.error");
-            span.recordException(ex);
-            throw ex;
-        } finally {
-            span.end();
-        }
     }
 
     @Override
@@ -124,13 +65,6 @@ public class CustomerServiceJpaImplementation implements CustomerService {
     @Override
     public void deleteById(int customerId) {
         customerJpaRepository.delete(fromId(customerId));
-    }
-    
-    @PostConstruct
-    public void init() {
-        Gauge.builder("customer.pending.customers", pendingCustomers, Deque::size)
-                .tag("service", "customer")
-                .register(meterRegistry);
     }
 
     private Customer fromId(int customerId) {

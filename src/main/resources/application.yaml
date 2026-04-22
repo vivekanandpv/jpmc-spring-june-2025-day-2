@@ -24,6 +24,9 @@ otel:
   traces:
     exporter: otlp
     sampler: always_on  # 100% of traces are sampled during dev
+  metrics:
+    exemplar:
+      filter: TRACE_BASED
 
 management:
   otlp:
@@ -31,6 +34,7 @@ management:
       export:
         url: http://localhost:4318/v1/metrics  # Micrometer's OTLP registry only supports HTTP, not gRPC
         step: 10s
+      
   endpoints:
     web:
       exposure:
@@ -44,6 +48,11 @@ management:
         http:
           server:
             requests: true
+        customers:
+          getall:
+            time: true
+          create:
+            time: true
   tracing:
     sampling:
       probability: 1.0

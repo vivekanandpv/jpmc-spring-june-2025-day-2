@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,8 +25,22 @@ public class CustomerApi {
     private final CustomerService customerService;
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomerApi.class.getName());
 
+    @Autowired
+    private io.micrometer.tracing.Tracer micrometerTracer;
+
+
     public CustomerApi(CustomerService customerService) {
         this.customerService = customerService;
+    }
+
+    @GetMapping("/trace")
+    public Map<String, String> traceInfo() {
+        var span = micrometerTracer.currentSpan();
+        return Map.of(
+                "spanId",  span != null ? span.context().spanId()  : "NO SPAN",
+                "traceId", span != null ? span.context().traceId() : "NO TRACE",
+                "sampled", span != null ? String.valueOf(span.context().sampled()) : "false"
+        );
     }
 
     @Operation(
