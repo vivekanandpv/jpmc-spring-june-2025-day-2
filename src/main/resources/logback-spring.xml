@@ -15,6 +15,10 @@
         <captureKeyValuePairAttributes>true</captureKeyValuePairAttributes>
     </appender>
 
+    <logger name="org.springframework" level="INFO"/>
+    <logger name="org.hibernate" level="INFO"/>
+    <logger name="com.zaxxer.hikari" level="INFO"/>
+
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
         <appender-ref ref="OTEL"/>

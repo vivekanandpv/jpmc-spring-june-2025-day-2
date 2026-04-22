@@ -7,13 +7,8 @@ receivers:
         endpoint: 0.0.0.0:4317
 
 exporters:
-  loki:
-    endpoint: "http://loki:3100/loki/api/v1/push"
-    default_labels_enabled:
-      exporter: false
-      job: true
-  otlp/loki:
-    endpoint: "http://loki:3100/otlp/v1/logs"
+  otlphttp/loki:
+    endpoint: "http://loki:3100/otlp"
     tls:
       insecure: true
   otlp/tempo:
@@ -23,14 +18,21 @@ exporters:
   prometheus:
     endpoint: "0.0.0.0:8889"
 
+processors:
+  batch:
+    send_batch_size: 1
+    timeout: 5s
+
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      exporters: [otlp/tempo] #fanning out to both exporter
+      processors: [batch]
+      exporters: [otlp/tempo]
     metrics:
       receivers: [otlp]
       exporters: [prometheus]
     logs:
       receivers: [otlp]
-      exporters: [otlp/loki]
+      processors: [batch]
+      exporters: [otlphttp/loki]

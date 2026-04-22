@@ -8,7 +8,7 @@ services:
     ports:
       - "4318:4318"
       - "4317:4317"
-      - "8889:8889" # for prometheus to scrape
+      - "8889:8889"
     depends_on:
       - loki
       - tempo
@@ -21,13 +21,12 @@ services:
     volumes:
       - ./loki.yaml:/etc/loki/local-config.yaml
     command: -config.file=/etc/loki/local-config.yaml
-#    command: -config.file=/etc/loki/local-config.yaml
-  
+
   tempo:
     image: grafana/tempo:latest
     ports:
       - "3200:3200"
-      - "4317"
+      - "4319:4317"
     volumes:
       - ./tempo.yaml:/etc/tempo.yaml
     command: -config.file=/etc/tempo.yaml
@@ -36,6 +35,9 @@ services:
     image: prom/prometheus:latest
     volumes:
       - ./prometheus.yaml:/etc/prometheus/prometheus.yml
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--enable-feature=exemplar-storage"
     ports:
       - "9090:9090"
     depends_on:
@@ -54,11 +56,3 @@ services:
     environment: 
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-  
-#  jaeger:
-#    image: jaegertracing/all-in-one:latest
-#    ports:
-#      - "16686:16686" # UI
-#      - "4319:4317"  # OTLP receiver (receives from OTel collector); 4317 conflicts with OTel Collector, hence remapped to 4319 here
-#  
-  
