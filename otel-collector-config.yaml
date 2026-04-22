@@ -7,35 +7,46 @@ receivers:
         endpoint: 0.0.0.0:4317
 
 exporters:
-#  loki:
-#    endpoint: "http://loki:3100/loki/api/v1/push"
-#    default_labels_enabled:
-#      exporter: false
-#      job: true
-#  otlp/loki:
-#    endpoint: "http://loki:3100/otlp/v1/logs"
-#    tls:
-#      insecure: true
   otlp/tempo:
     endpoint: "http://tempo:4317"
     tls:
       insecure: true
+
   prometheus:
     endpoint: "0.0.0.0:8889"
-    
+
+  otlphttp/loki:
+    endpoint: "http://loki:3100/otlp"
+    tls:
+      insecure: true
+
 processors:
-  probabilistic_sampler:
-    sampling_percentage: 25
+  batch:
+    send_batch_size: 1
+    timeout: 5s
+
+  tail_sampling:
+    decision_wait: 10s
+    num_traces: 50000
+    expected_new_traces_per_sec: 5000
+    policies:
+      - name: sample-25-percent
+        type: probabilistic
+        probabilistic:
+          sampling_percentage: 25.0
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [probabilistic_sampler]
-      exporters: [otlp/tempo] #fanning out to both exporter
+      processors: [tail_sampling, batch]
+      exporters: [otlp/tempo]
+
     metrics:
       receivers: [otlp]
       exporters: [prometheus]
-#    logs:
-#      receivers: [otlp]
-#      exporters: [otlp/loki]
+
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/loki]
