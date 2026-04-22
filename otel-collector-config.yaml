@@ -24,17 +24,21 @@ exporters:
     endpoint: "0.0.0.0:8889"
     
 processors:
+  batch:
+    send_batch_size: 1
+    timeout: 5s
   tail_sampling:
-    decision_wait: 10s
-    num_traces: 100000
-    expected_new_traces_per_sec: 100
+    decision_wait: 1s
+    num_traces: 5
+    expected_new_traces_per_sec: 1
     policies:
-      - name: error-traces
-        type: status_code
-        status_codes: [ status_code: ["ERROR"] ]
-      - name: slow-traces
-        type: latency
-        latency: {threshold_ms: 2000}
+#      or based!
+#      - name: error-traces
+#        type: status_code
+#        status_code: { status_codes: ["ERROR"] }
+#      - name: slow-traces
+#        type: latency
+#        latency: {threshold_ms: 2000}
       - name: normal-traces
         type: probabilistic
         probabilistic: {sampling_percentage: 10}
@@ -42,7 +46,7 @@ service:
   pipelines:
     traces:
       receivers: [otlp]
-      processors: [tail_sampling]
+      processors: [tail_sampling, batch]
       exporters: [otlp/tempo] #fanning out to both exporter
     metrics:
       receivers: [otlp]
